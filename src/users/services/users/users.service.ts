@@ -25,14 +25,17 @@ export class UsersService {
     private jwtService: JwtService,
   ) {}
 
-  fetchUsers() {
-    return this.userRepository.find({ relations: ['notes'] });
+  async fetchUsers() {
+    const users = await this.userRepository.find();
+    return users;
   }
-  fetchUserById(id: number) {
-    return this.userRepository.findOne({
+  async fetchUserById(id: number) {
+    const user = await this.userRepository.findOne({
       where: { id },
       relations: ['notes'],
     });
+    const { password, ...res } = user;
+    return res;
   }
   async createUser(userDetails: CreateUserParams) {
     const hashedPassword = await bcrypt.hash(userDetails.password, 10);

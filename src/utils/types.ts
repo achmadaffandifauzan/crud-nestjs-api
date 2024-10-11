@@ -4,11 +4,15 @@ export type CreateUserParams = {
   confirmPassword: string;
   firstName: string;
   lastName: string;
-  hobby: string;
+  hobby?: string;
 };
 export type UpdateUserParams = {
   username: string;
   password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  hobby?: string;
 };
 export type CreateUserNoteParams = {
   title: string;
