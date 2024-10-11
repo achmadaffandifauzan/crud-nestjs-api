@@ -22,5 +22,6 @@ import { Note } from './typeorm/entities/Note';
   ],
   controllers: [AppController],
   providers: [AppService],
+  exports: [AppService],
 })
 export class AppModule {}

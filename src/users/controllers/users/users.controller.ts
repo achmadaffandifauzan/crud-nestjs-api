@@ -8,11 +8,13 @@ import {
   Patch,
   Post,
   Put,
+  Render,
 } from '@nestjs/common';
 import { UsersService } from 'src/users/services/users/users.service';
 import { CreateUserDto } from 'src/users/dtos/CreateUser.dto';
 import { CreateUserNoteDto } from 'src/users/dtos/CreateUserNote.dto';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
+import { SignInDto } from 'src/users/dtos/SignIn.dto';
 
 @Controller('users')
 export class UsersController {
@@ -34,6 +36,11 @@ export class UsersController {
   async createUser(@Body() createUserDto: CreateUserDto) {
     const newUser = this.userService.createUser(createUserDto);
     return newUser;
+  }
+  @Post('login')
+  async signIn(@Body() signInDto: SignInDto) {
+    const user = this.userService.signIn(signInDto);
+    return user;
   }
 
   @Patch(':id')

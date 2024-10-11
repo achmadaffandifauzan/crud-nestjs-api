@@ -4,9 +4,19 @@ import { UsersService } from './services/users/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/typeorm/entities/User';
 import { Note } from 'src/typeorm/entities/Note';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Note])],
+  imports: [
+    ConfigModule.forRoot(),
+    TypeOrmModule.forFeature([User, Note]),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWTCONSTANT,
+      signOptions: { expiresIn: '60s' },
+    }),
+  ],
   controllers: [UsersController],
   providers: [UsersService],
 })

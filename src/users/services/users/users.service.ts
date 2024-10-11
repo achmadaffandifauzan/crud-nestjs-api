@@ -1,19 +1,28 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { Note } from 'src/typeorm/entities/Note';
 import { User } from 'src/typeorm/entities/User';
 import {
   CreateUserNoteParams,
   CreateUserParams,
+  SignInParams,
   UpdateUserParams,
 } from 'src/utils/types';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Note) private noteRepository: Repository<Note>,
+    private jwtService: JwtService,
   ) {}
 
   fetchUsers() {
@@ -25,12 +34,40 @@ export class UsersService {
       relations: ['notes'],
     });
   }
-  createUser(userDetails: CreateUserParams) {
+  async createUser(userDetails: CreateUserParams) {
+    const hashedPassword = await bcrypt.hash(userDetails.password, 10);
+    const foundUser = await this.userRepository.findOne({
+      where: { username: userDetails.username },
+    });
+    if (foundUser) {
+      throw new HttpException('Username already exist!', 409);
+    }
     const newUser = this.userRepository.create({
       ...userDetails,
+      password: hashedPassword,
       createdAt: new Date(),
     });
     return this.userRepository.save(newUser);
+  }
+  async signIn(
+    signinParams: SignInParams,
+  ): Promise<{ access_token: string; userId: number }> {
+    const { username, password } = signinParams;
+    const foundUser = await this.userRepository.findOne({
+      where: { username },
+    });
+    if (!foundUser) {
+      throw new HttpException('Username not found!', 404);
+    }
+    const compare = await bcrypt.compare(password, foundUser.password);
+    if (!compare) {
+      throw new UnauthorizedException();
+    }
+    const payload = { sub: foundUser.id, username: foundUser.username };
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+      userId: foundUser.id,
+    };
   }
   updateUser(id: number, updateUserDetails: UpdateUserParams) {
     const updatedUser = this.userRepository.update(
