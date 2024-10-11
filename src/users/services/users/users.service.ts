@@ -47,7 +47,12 @@ export class UsersService {
       password: hashedPassword,
       createdAt: new Date(),
     });
-    return this.userRepository.save(newUser);
+    await this.userRepository.save(newUser);
+    const payload = { sub: newUser.id, username: newUser.username };
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+      userId: newUser.id,
+    };
   }
   async signIn(
     signinParams: SignInParams,
