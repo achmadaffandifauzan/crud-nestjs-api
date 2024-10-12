@@ -36,11 +36,10 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
       userId: newUser.id,
       statusCode: HttpStatus.CREATED,
+      message: 'Registration successful!',
     };
   }
-  async login(
-    loginParams: LoginParams,
-  ): Promise<{ access_token: string; userId: number }> {
+  async login(loginParams: LoginParams) {
     const { username, password } = loginParams;
     const foundUser = await this.userRepository.findOne({
       where: { username },
@@ -56,6 +55,8 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload),
       userId: foundUser.id,
+      statusCode: HttpStatus.OK,
+      message: 'Successfully logged in!',
     };
   }
 }

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Note } from 'src/typeorm/entities/Note';
 import { User } from 'src/typeorm/entities/User';
-import { CreateUserNoteParams, UpdateUserParams } from 'src/utils/types';
+import { UpdateUserParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
@@ -11,8 +11,6 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    @InjectRepository(Note) private noteRepository: Repository<Note>,
-    private jwtService: JwtService,
   ) {}
 
   async fetchUserById(id: number) {
@@ -56,30 +54,5 @@ export class UsersService {
       message: 'User deleted successfully',
       statusCode: HttpStatus.OK,
     };
-  }
-
-  async createUserNote(
-    id: number,
-    createUserNoteDetails: CreateUserNoteParams,
-  ) {
-    const user = await this.userRepository.findOneBy({ id });
-    if (!user) {
-      throw new HttpException(
-        'User not found, failed creating a note!',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const newNote = this.noteRepository.create({
-      ...createUserNoteDetails,
-      user,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-    await this.noteRepository.save(newNote);
-
-    return this.userRepository.findOne({
-      where: { id },
-      relations: ['notes'],
-    });
   }
 }

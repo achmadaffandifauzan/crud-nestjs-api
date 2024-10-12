@@ -40,16 +40,4 @@ export class UsersController {
     const res = await this.userService.deleteUser(id);
     return res;
   }
-
-  // @Post(':id/notes')
-  // async createUserNote(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() createUserNoteDto: CreateUserNoteDto,
-  // ) {
-  //   const createOneNote = this.userService.createUserNote(
-  //     id,
-  //     createUserNoteDto,
-  //   );
-  //   return createOneNote;
-  // }
 }

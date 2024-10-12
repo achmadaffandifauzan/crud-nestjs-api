@@ -12,7 +12,7 @@ export type UpdateUserParams = {
   lastName?: string;
   hobby?: string;
 };
-export type CreateUserNoteParams = {
+export type CreateNoteParams = {
   title: string;
   description: string;
 };
