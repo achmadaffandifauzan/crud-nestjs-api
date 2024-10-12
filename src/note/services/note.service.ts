@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Note } from 'src/typeorm/entities/Note';
 import { User } from 'src/typeorm/entities/User';
-import { CreateNoteParams } from 'src/utils/types';
+import { CreateNoteParams, UpdateNoteParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -12,40 +12,12 @@ export class NoteService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Note) private noteRepository: Repository<Note>,
   ) {}
-  async createNote(userId: number, createNoteDetails: CreateNoteParams) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new HttpException(
-        'User not found, failed creating a note!',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const newNote = this.noteRepository.create({
-      ...createNoteDetails,
-      user,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-    await this.noteRepository.save(newNote);
-
-    return {
-      noteId: newNote.id,
-      statusCode: HttpStatus.CREATED,
-      message: 'Note created successfully!',
-    };
-  }
 
   async fetchNotes(userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['notes'],
     });
-    if (!user) {
-      throw new HttpException(
-        'User not found, failed creating a note!',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     return user.notes;
   }
 
@@ -62,5 +34,71 @@ export class NoteService {
     }
     const { user, ...res } = note;
     return res;
+  }
+
+  async createNote(userId: number, createNoteDetails: CreateNoteParams) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const newNote = this.noteRepository.create({
+      ...createNoteDetails,
+      user,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await this.noteRepository.save(newNote);
+
+    return {
+      noteId: newNote.id,
+      statusCode: HttpStatus.CREATED,
+      message: 'Note created successfully!',
+    };
+  }
+
+  async updateNoteById(
+    noteId: number,
+    userId: number,
+    updateNoteDetails: UpdateNoteParams,
+  ) {
+    const note = await this.noteRepository.findOne({
+      where: { id: noteId },
+      relations: ['user'],
+    });
+    if (!note) {
+      throw new HttpException('Note not found!', HttpStatus.NOT_FOUND);
+    }
+    if (note.user.id !== userId) {
+      throw new HttpException('Forbidden!', HttpStatus.FORBIDDEN);
+    }
+    await this.noteRepository.update(
+      { id: noteId },
+      { ...updateNoteDetails, updatedAt: new Date() },
+    );
+    const updatedNote = await this.userRepository.findOne({
+      where: { id: noteId },
+    });
+    await this.noteRepository.save(updatedNote);
+
+    return {
+      noteId: updatedNote.id,
+      statusCode: HttpStatus.OK,
+      message: 'Note updated successfully!',
+    };
+  }
+
+  async deleteNoteById(noteId: number, userId: number) {
+    const note = await this.noteRepository.findOne({
+      where: { id: noteId },
+      relations: ['user'],
+    });
+    if (!note) {
+      throw new HttpException('Note not found!', HttpStatus.NOT_FOUND);
+    }
+    if (note.user.id !== userId) {
+      throw new HttpException('Forbidden!', HttpStatus.FORBIDDEN);
+    }
+    await this.noteRepository.delete(noteId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Note deleted successfully',
+    };
   }
 }

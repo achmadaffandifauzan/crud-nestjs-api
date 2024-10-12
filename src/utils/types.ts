@@ -16,6 +16,10 @@ export type CreateNoteParams = {
   title: string;
   description: string;
 };
+export type UpdateNoteParams = {
+  title?: string;
+  description?: string;
+};
 export type LoginParams = {
   username: string;
   password: string;
