@@ -23,7 +23,7 @@ export class NoteController {
   @UseGuards(AuthGuard('jwt'))
   async fetchNotes(@Req() req) {
     const userId = req.user.userId;
-    const notes = this.noteService.fetchNotes(userId);
+    const notes = await this.noteService.fetchNotes(userId);
     return notes;
   }
 
@@ -31,15 +31,15 @@ export class NoteController {
   @UseGuards(AuthGuard('jwt'))
   async fetchNoteById(@Req() req, @Param('id', ParseIntPipe) noteId: number) {
     const userId = req.user.userId;
-    const note = this.noteService.fetchNoteById(noteId, userId);
+    const note = await this.noteService.fetchNoteById(noteId, userId);
     return note;
   }
 
-  @Post('new')
+  @Post()
   @UseGuards(AuthGuard('jwt'))
   async createNote(@Body() createNoteDto: CreateNoteDto, @Req() req) {
     const userId = req.user.userId;
-    const note = this.noteService.createNote(userId, createNoteDto);
+    const note = await this.noteService.createNote(userId, createNoteDto);
     return note;
   }
 
@@ -51,7 +51,11 @@ export class NoteController {
     @Body() updateNoteDto: UpdateNoteDto,
   ) {
     const userId = req.user.userId;
-    const note = this.noteService.updateNoteById(noteId, userId, updateNoteDto);
+    const note = await this.noteService.updateNoteById(
+      noteId,
+      userId,
+      updateNoteDto,
+    );
     return note;
   }
 
@@ -59,7 +63,7 @@ export class NoteController {
   @UseGuards(AuthGuard('jwt'))
   async deleteNoteById(@Req() req, @Param('id', ParseIntPipe) noteId: number) {
     const userId = req.user.userId;
-    const note = this.noteService.deleteNoteById(noteId, userId);
+    const note = await this.noteService.deleteNoteById(noteId, userId);
     return note;
   }
 }

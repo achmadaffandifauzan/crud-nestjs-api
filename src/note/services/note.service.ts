@@ -48,6 +48,7 @@ export class NoteService {
 
     return {
       noteId: newNote.id,
+      title: newNote.title,
       statusCode: HttpStatus.CREATED,
       message: 'Note created successfully!',
     };
