@@ -15,15 +15,12 @@ export class UsersService {
     private jwtService: JwtService,
   ) {}
 
-  async fetchUsers() {
-    const users = await this.userRepository.find();
-    return users;
-  }
   async fetchUserById(id: number) {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['notes'],
     });
+
     const { password, ...res } = user;
     return res;
   }

@@ -31,7 +31,7 @@ export class AuthService {
       createdAt: new Date(),
     });
     await this.userRepository.save(newUser);
-    const payload = { sub: newUser.id, username: newUser.username };
+    const payload = { userId: newUser.id, username: newUser.username };
     return {
       access_token: await this.jwtService.signAsync(payload),
       userId: newUser.id,
@@ -52,7 +52,7 @@ export class AuthService {
     if (!compare) {
       throw new UnauthorizedException();
     }
-    const payload = { sub: foundUser.id, username: foundUser.username };
+    const payload = { userId: foundUser.id, username: foundUser.username };
     return {
       access_token: await this.jwtService.signAsync(payload),
       userId: foundUser.id,
