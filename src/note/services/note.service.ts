@@ -73,10 +73,9 @@ export class NoteService {
       { id: noteId },
       { ...updateNoteDetails, updatedAt: new Date() },
     );
-    const updatedNote = await this.userRepository.findOne({
+    const updatedNote = await this.noteRepository.findOne({
       where: { id: noteId },
     });
-    await this.noteRepository.save(updatedNote);
 
     return {
       noteId: updatedNote.id,
